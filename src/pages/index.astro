@@ -1,5 +1,5 @@
 ---
-import { Image, getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import GalleryCard from '../components/GalleryCard.astro';
 import WorkEntry from '../components/WorkEntry.astro';
@@ -8,7 +8,6 @@ import ThemeLang from '../components/ThemeLang.astro';
 import { ext } from '../data/links';
 import { profile, experience, workingAt, developing, built, tabs, ui, gallery, workGroups, connectLinks, copiedLabel, footer, story } from '../data/content';
 
-const avatarFx = await getImage({ src: profile.avatar, width: 240, format: 'webp', quality: 90 });
 const SETS = 4; // 1 реальный + клоны для бесконечной ленты
 ---
 
@@ -16,28 +15,6 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   <main class="work" data-work>
     <div class="work__stage" data-stage>
       <ThemeLang />
-
-      <!-- мобильная анимация аватара: при скролле фото «втягивается» в шапку (метабол-эффект как в Telegram) -->
-      <div class="avfx-bar" data-avfx-bar aria-hidden="true"></div>
-      <svg class="avfx" data-avfx width="100%" height="300" aria-hidden="true" focusable="false">
-        <defs>
-          <filter id="avfx-goo" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="300" color-interpolation-filters="sRGB">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b" />
-            <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
-          </filter>
-          <mask id="avfx-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="300">
-            <g filter="url(#avfx-goo)">
-              <circle data-fx="m" fill="#fff" cx="0" cy="0" r="0" />
-              <circle data-fx="a" fill="#fff" cx="0" cy="0" r="0" />
-            </g>
-          </mask>
-          <clipPath id="avfx-clip-m"><circle data-fx="cm" cx="0" cy="0" r="0" /></clipPath>
-          <clipPath id="avfx-clip-a"><circle data-fx="ca" cx="0" cy="0" r="0" /></clipPath>
-        </defs>
-        <rect x="0" y="0" width="100%" height="300" fill="#16285f" mask="url(#avfx-mask)" />
-        <image data-fx="im" href={avatarFx.src} preserveAspectRatio="xMidYMid slice" clip-path="url(#avfx-clip-m)" />
-        <image data-fx="ia" href={avatarFx.src} preserveAspectRatio="xMidYMid slice" clip-path="url(#avfx-clip-a)" />
-      </svg>
 
       <div class="page">
         <div class="avatar" data-reveal style="--i:3">
@@ -119,7 +96,7 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
               <div class="gallery__track" data-track>
                 {Array.from({ length: SETS }, (_, i) => (
                   <div class="gallery__set" data-set data-clone={i > 0 ? '' : undefined} aria-hidden={i > 0 ? 'true' : undefined}>
-                    {gallery.map((card, n) => <GalleryCard card={card} eager={i === 0 && n < 2} />)}
+                    {gallery.map((card, n) => <GalleryCard card={card} eager={i === 0 && n < 2} clone={i > 0} />)}
                   </div>
                 ))}
               </div>
@@ -248,7 +225,8 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
 
   .app-icon { flex: none; width: 56px; height: 56px; border-radius: 14px; object-fit: cover; }
 
-  .tabs { display: flex; flex-wrap: wrap; gap: 8px clamp(16px, 5.5vw, 32px); margin-top: 61px; }
+  /* зазор между табами: растёт с шириной (на 390px ≈ 24px), 280px — суммарная ширина подписей EN при 16px */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px clamp(12px, calc((100vw - var(--page-pad) * 2 - 280px) / 3), 32px); margin-top: 61px; }
   .tabs__tab {
     padding: 0; border: 0; background: none; cursor: pointer; touch-action: manipulation;
     font: 400 var(--fs-16) / var(--lh-140) var(--font-mono); text-transform: uppercase;
@@ -296,17 +274,6 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   .connect .link::before { content: ''; position: absolute; inset: -12px -6px; } /* зона нажатия ≥ 44px */
 
 
-  /* ---------- мобильная анимация аватара ---------- */
-  .avfx, .avfx-bar { display: none; }
-  :global(html.avfx-on) .avfx { position: fixed; left: 0; top: 0; z-index: 25; pointer-events: none; overflow: visible; }
-  :global(html.avfx-on) .avfx-bar {
-    display: block; position: fixed; left: 0; right: 0; top: 0; z-index: 20; pointer-events: none;
-    height: calc(max(12px, env(safe-area-inset-top)) + 40px + 18px);
-    background: linear-gradient(to bottom, var(--color-bg) 62%, transparent);
-    opacity: 0; transition: opacity 0.25s var(--ease-out);
-  }
-  :global(html.avfx-on.avfx-scrolled) .avfx-bar { opacity: 1; }
-
   /* ---------- адаптив ---------- */
   /* ноутбук 1024–1439: макет 800px по центру, без изменений */
   /* планшет 768–1023 */
@@ -331,8 +298,10 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
     .tabs__tab { padding-block: 12px; margin-block: -12px; }
   }
   /* узкие телефоны: длинные подписи («EXPERIENCE») не должны переноситься на вторую строку */
-  @media (max-width: 399px) { .tabs { column-gap: 12px; } }
-  @media (max-width: 339px) { .tabs__tab { font-size: var(--fs-14); } }
+  @media (max-width: 339px) {
+    .tabs__tab { font-size: var(--fs-14); }
+    .tabs { column-gap: clamp(12px, calc((100vw - var(--page-pad) * 2 - 246px) / 3), 32px); }
+  }
   .group__role .link { --ul-up: 2px; white-space: nowrap; } /* «в Т-Банк» не рвётся по дефису */
 
   /* footer — на всех разделах, кроме All; прижат к низу, 64px от контента, 20px до края */
@@ -357,6 +326,7 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   :global(.motion) .gallery__lens {
     margin: calc(var(--bleed) * -1) calc(var(--lens-m) * -1); padding: var(--bleed) 0; filter: url(#lens);
   }
+  :global(.motion) .gallery[data-lens='css'] .gallery__lens { filter: none; }
   :global(.motion) .gallery__set[data-clone] { display: flex; }
   :global(.motion) .gallery__track {
     transform: translate3d(calc(var(--lens-m) + var(--gutter) - var(--period)), 0, 0);
@@ -369,6 +339,5 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   import '../scripts/motion';
   import '../scripts/tabs';
   import '../scripts/copy';
-  import '../scripts/avatar-fx';
   import '../scripts/controls';
 </script>

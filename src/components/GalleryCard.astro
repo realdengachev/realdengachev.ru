@@ -6,13 +6,19 @@ import T from './T.astro';
 interface Props {
   card: GalleryCard;
   eager?: boolean;
+  clone?: boolean;
 }
-const { card, eager = false } = Astro.props;
+const { card, eager = false, clone = false } = Astro.props;
+// карточка с ссылкой — <a>, без ссылки — <div>
+const Tag = (card.href ? 'a' : 'div') as 'a';
+const linkAttrs: Record<string, string | number | boolean | undefined> = card.href
+  ? { href: card.href, target: '_blank', rel: 'noopener noreferrer', draggable: false, tabindex: clone ? -1 : undefined }
+  : {};
 const loading = eager ? 'eager' : 'lazy';
 const poster = card.kind === 'phone-video' ? await getImage({ src: card.poster, width: 540, format: 'webp', quality: 85 }) : null;
 const widePoster = card.kind === 'wide-video' ? await getImage({ src: card.poster, width: 1240, format: 'webp', quality: 85 }) : null;
 ---
-<div class:list={['card', card.kind.startsWith('wide') ? 'card--wide' : 'card--phone']}>
+<Tag class:list={['card', card.kind.startsWith('wide') ? 'card--wide' : 'card--phone', { 'card--link': !!card.href }]} {...linkAttrs}>
   {
     card.kind === 'wide' && (
       <div class="card__plate card__plate--wide">
@@ -118,10 +124,13 @@ const widePoster = card.kind === 'wide-video' ? await getImage({ src: card.poste
       <span class="card__cap-text"><T l={card.caption.text} /></span>
     </p>
   </div>
-</div>
+</Tag>
 
 <style>
-  .card { display: flex; flex-direction: column; gap: var(--gap-12); flex: none; }
+  .card { display: flex; flex-direction: column; gap: var(--gap-12); flex: none; transform-origin: 50% 50%; }
+  .card--link { color: inherit; text-decoration: none; cursor: pointer; }
+  .card--link:focus-visible { outline: none; }
+  .card--link:focus-visible .card__plate { outline: 1px solid var(--color-text); outline-offset: 3px; }
   .card--wide { width: 700px; }
   .card--phone { width: 300px; }
 
@@ -159,8 +168,8 @@ const widePoster = card.kind === 'wide-video' ? await getImage({ src: card.poste
   }
   @media (hover: hover) {
     .card__cap-in { transform: translate3d(0, -100%, 0); opacity: 0; }
-    .card:hover .card__cap-in { transform: none; opacity: 1; }
-    .card:hover .card__cap-name { background-size: 100% 1px, 100% 1px; }
+    .card:hover .card__cap-in, .card:focus-visible .card__cap-in { transform: none; opacity: 1; }
+    .card:hover .card__cap-name, .card:focus-visible .card__cap-name { background-size: 100% 1px, 100% 1px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .card__cap-in { transition: none; }

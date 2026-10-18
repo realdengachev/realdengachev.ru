@@ -19,6 +19,7 @@ function setupLens(gallery: HTMLElement, lens: HTMLElement): () => void {
   if (!map || !disp) return () => {};
 
   const build = (): void => {
+    if (isCompact()) return; // на телефонах линзу рисуют трансформации карточек (см. infiniteGallery)
     const vw = gallery.clientWidth;
     const w = vw + LENS_MARGIN * 2;
     const h = lens.offsetHeight;
@@ -82,9 +83,33 @@ function infiniteGallery(): () => void {
   let last = 0;
   let idleTimer = 0;
 
+  // Линза: на десктопе — SVG-фильтр; на телефонах (в Safari iOS он не работает) — тот же эффект трансформациями карточек
+  const compact = matchMedia('(max-width: 767px)');
+  const cards = [...track.querySelectorAll<HTMLElement>('.card')];
+  const cssLens = (): boolean => compact.matches;
+  const applyCssLens = (): void => {
+    const g = gallery.getBoundingClientRect();
+    const half = g.width / 2;
+    const rects = cards.map((c) => c.getBoundingClientRect()); // сначала читаем, потом пишем — без лишних reflow
+    cards.forEach((c, i) => {
+      const r = rects[i];
+      if (!r) return;
+      const u = (r.left + r.width / 2 - g.left - half) / half;
+      const z = lensZone(u, 0.2);
+      c.style.transform = z < 0.001 ? '' : `scale(${(1 + 0.03 * z).toFixed(4)}, ${(1 + 0.12 * z).toFixed(4)})`;
+    });
+  };
+  const syncLensMode = (): void => {
+    const css = cssLens();
+    gallery.dataset.lens = css ? 'css' : 'svg';
+    if (css) applyCssLens();
+    else cards.forEach((c) => (c.style.transform = ''));
+  };
+
   const origin = (): number => LENS_MARGIN + (parseFloat(getComputedStyle(gallery).getPropertyValue('--gutter')) || 16);
   const render = (): void => {
     track.style.transform = `translate3d(${trackX(pos, period, origin()).toFixed(2)}px,0,0)`;
+    if (cssLens()) applyCssLens();
   };
 
   const measure = (): void => {
@@ -133,8 +158,12 @@ function infiniteGallery(): () => void {
     kick();
   };
 
-  // drag
+  // drag: захват указателя только после сдвига > 6px — иначе обычный тап/клик по карточке-ссылке проходит как есть
+  const THRESHOLD = 6;
+  let pending = false;
   let dragging = false;
+  let suppressClick = false;
+  let downX = 0;
   let startX = 0;
   let startTarget = 0;
   let vel = 0;
@@ -142,18 +171,25 @@ function infiniteGallery(): () => void {
   let lastT = 0;
   const onDown = (e: PointerEvent): void => {
     if (e.button !== 0) return;
-    dragging = true;
-    startX = lastX = e.clientX;
+    pending = true;
+    dragging = false;
+    downX = startX = lastX = e.clientX;
     startTarget = target;
     lastT = e.timeStamp;
     vel = 0;
-    follow = DRAG_FOLLOW;
-    gallery.classList.add('is-dragging');
-    gallery.setPointerCapture(e.pointerId);
-    kick();
   };
   const onMove = (e: PointerEvent): void => {
-    if (!dragging) return;
+    if (!pending) return;
+    if (!dragging) {
+      if (Math.abs(e.clientX - downX) < THRESHOLD) return;
+      dragging = true;
+      follow = DRAG_FOLLOW;
+      gallery.classList.add('is-dragging');
+      gallery.setPointerCapture(e.pointerId);
+      startX = lastX = e.clientX;
+      startTarget = target;
+      lastT = e.timeStamp;
+    }
     target = startTarget - (e.clientX - startX);
     const dt = e.timeStamp - lastT;
     if (dt > 0) vel = (e.clientX - lastX) / dt; // px/ms
@@ -162,13 +198,22 @@ function infiniteGallery(): () => void {
     kick();
   };
   const onUp = (e: PointerEvent): void => {
+    if (!pending) return;
+    pending = false;
     if (!dragging) return;
     dragging = false;
+    suppressClick = true; // клик, закончивший перетаскивание, не должен открывать ссылку
+    window.setTimeout(() => (suppressClick = false), 0);
     gallery.classList.remove('is-dragging');
     if (gallery.hasPointerCapture(e.pointerId)) gallery.releasePointerCapture(e.pointerId);
     follow = FOLLOW;
     if (e.timeStamp - lastT < 80) target -= vel * FLING * 1000; // инерция
     kick();
+  };
+  const onClickCapture = (e: MouseEvent): void => {
+    if (!suppressClick) return;
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   gallery.addEventListener('wheel', onWheel, { passive: false });
@@ -176,10 +221,13 @@ function infiniteGallery(): () => void {
   gallery.addEventListener('pointermove', onMove);
   gallery.addEventListener('pointerup', onUp);
   gallery.addEventListener('pointercancel', onUp);
+  gallery.addEventListener('click', onClickCapture, true);
 
   const ro = new ResizeObserver(measure);
   ro.observe(firstSet);
   measure();
+  compact.addEventListener('change', syncLensMode);
+  syncLensMode();
   const disposeLens = setupLens(gallery, lens);
 
   return () => {
@@ -192,6 +240,8 @@ function infiniteGallery(): () => void {
     gallery.removeEventListener('pointermove', onMove);
     gallery.removeEventListener('pointerup', onUp);
     gallery.removeEventListener('pointercancel', onUp);
+    gallery.removeEventListener('click', onClickCapture, true);
+    compact.removeEventListener('change', syncLensMode);
     track.style.transform = '';
   };
 }

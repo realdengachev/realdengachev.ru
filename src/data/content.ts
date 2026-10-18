@@ -7,15 +7,12 @@ import cardE from '../assets/img/card-e.png';
 import pantryPoster from '../assets/img/pantry-poster.png';
 import vinylPoster from '../assets/img/vinyl-poster.png';
 import nadiktuyPoster from '../assets/img/nadiktuy-poster.png';
-import phoneWallpaper from '../assets/img/phone-wallpaper.png';
 import logoMr from '../assets/img/logo-mrgroup.png';
 import logoOchen from '../assets/img/logo-ochen.jpg';
 import logoVtb from '../assets/img/logo-vtb.png';
 import logoAvito from '../assets/img/logo-avito.png';
 import logoTbank from '../assets/img/logo-tbank.png';
 import logoCrauch from '../assets/img/logo-crauch.png';
-import logoDeepWork from '../assets/img/logo-deep-work.png';
-import logoSnapbuildOld from '../assets/img/logo-snapbuild.jpg';
 import logoDeepNew from '../assets/img/logo-deep-new.png';
 import logoDeepRound from '../assets/img/logo-deep-round.png';
 import logoSnapNew from '../assets/img/logo-snapbuild-new.png';
@@ -119,7 +116,7 @@ export interface CardCaption {
   text: L;
 }
 
-export type GalleryCard = { caption: CardCaption } & (
+export type GalleryCard = { caption: CardCaption; href?: string } & (
   | { kind: 'wide'; image: ImageMetadata; alt: string; fillH?: number; fillTop?: number }
   | { kind: 'phone-ios16'; wallpaper: ImageMetadata; alt: string }
   | { kind: 'phone-video'; video: string; poster: ImageMetadata; alt: string; lazy?: boolean; bare?: boolean }
@@ -132,6 +129,7 @@ export const gallery: GalleryCard[] = [
     kind: 'wide',
     image: cardA,
     alt: "Snapbuild product's main page",
+    href: 'https://snapbuild.ru/work',
     caption: { name: l('Snapbuild', 'Снэпбилд'), text: l("product's main page", 'продуктовая страница') },
   },
   {
@@ -147,6 +145,7 @@ export const gallery: GalleryCard[] = [
     alt: 'AI studio website with project catalogue',
     fillH: 101.86,
     fillTop: -0.14,
+    href: 'https://ochen.digital/',
     caption: { name: same('Очень'), text: l("AI studio's website", 'сайт AI-студии') },
   },
   {
@@ -155,6 +154,7 @@ export const gallery: GalleryCard[] = [
     alt: 'Deep.app landing page: Controlled AI UGC',
     fillH: 102.1,
     fillTop: 0.01,
+    href: 'https://deeep.app/ugc',
     caption: { name: same('Deeep.app'), text: l('product page', 'продуктовая страница') },
   },
   {
@@ -164,6 +164,7 @@ export const gallery: GalleryCard[] = [
     lazy: true, // 4.5 МБ — грузим, когда карточка рядом с экраном
     bare: true, // в записи уже есть статус-бар и остров — рамка без своих
     alt: 'Nadiktuy Telegram bot: a voice note is turned into a ready-to-send text',
+    href: 'https://t.me/nadiktuy_bot',
     caption: { name: l('Nadiktuy', 'Надиктуй'), text: l('AI STT service', 'AI STT сервис') },
   },
   {

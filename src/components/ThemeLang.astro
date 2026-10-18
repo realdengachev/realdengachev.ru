@@ -38,8 +38,6 @@ const dict = {
     position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(var(--page-pad), calc((100% - var(--content-w)) / 2)); z-index: 5;
     display: flex; gap: 8px;
   }
-  /* на мобильном шапка закреплена: в неё «втягивается» аватар */
-  :global(html.avfx-on) .controls { position: fixed; z-index: 30; }
   .ctl {
     --w-open: 96px;
     display: flex; align-items: center; flex: none;
