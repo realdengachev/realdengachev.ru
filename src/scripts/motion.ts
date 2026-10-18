@@ -83,33 +83,15 @@ function infiniteGallery(): () => void {
   let last = 0;
   let idleTimer = 0;
 
-  // Линза: на десктопе — SVG-фильтр; на телефонах (в Safari iOS он не работает) — тот же эффект трансформациями карточек
+  // Линза (SVG-фильтр) — только на десктопе; на телефонах отключена
   const compact = matchMedia('(max-width: 767px)');
-  const cards = [...track.querySelectorAll<HTMLElement>('.card')];
-  const cssLens = (): boolean => compact.matches;
-  const applyCssLens = (): void => {
-    const g = gallery.getBoundingClientRect();
-    const half = g.width / 2;
-    const rects = cards.map((c) => c.getBoundingClientRect()); // сначала читаем, потом пишем — без лишних reflow
-    cards.forEach((c, i) => {
-      const r = rects[i];
-      if (!r) return;
-      const u = (r.left + r.width / 2 - g.left - half) / half;
-      const z = lensZone(u, 0.2);
-      c.style.transform = z < 0.001 ? '' : `scale(${(1 + 0.03 * z).toFixed(4)}, ${(1 + 0.12 * z).toFixed(4)})`;
-    });
-  };
   const syncLensMode = (): void => {
-    const css = cssLens();
-    gallery.dataset.lens = css ? 'css' : 'svg';
-    if (css) applyCssLens();
-    else cards.forEach((c) => (c.style.transform = ''));
+    gallery.dataset.lens = compact.matches ? 'none' : 'svg';
   };
 
   const origin = (): number => LENS_MARGIN + (parseFloat(getComputedStyle(gallery).getPropertyValue('--gutter')) || 16);
   const render = (): void => {
     track.style.transform = `translate3d(${trackX(pos, period, origin()).toFixed(2)}px,0,0)`;
-    if (cssLens()) applyCssLens();
   };
 
   const measure = (): void => {

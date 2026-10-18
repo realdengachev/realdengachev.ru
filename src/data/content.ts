@@ -146,7 +146,7 @@ export const gallery: GalleryCard[] = [
     fillH: 101.86,
     fillTop: -0.14,
     href: 'https://ochen.digital/',
-    caption: { name: same('Очень'), text: l("AI studio's website", 'сайт AI-студии') },
+    caption: { name: l('Ochen', 'Очень'), text: l("AI studio's website", 'сайт AI-студии') },
   },
   {
     kind: 'wide',

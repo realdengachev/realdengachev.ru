@@ -326,7 +326,7 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   :global(.motion) .gallery__lens {
     margin: calc(var(--bleed) * -1) calc(var(--lens-m) * -1); padding: var(--bleed) 0; filter: url(#lens);
   }
-  :global(.motion) .gallery[data-lens='css'] .gallery__lens { filter: none; }
+  :global(.motion) .gallery[data-lens='none'] .gallery__lens { filter: none; }
   :global(.motion) .gallery__set[data-clone] { display: flex; }
   :global(.motion) .gallery__track {
     transform: translate3d(calc(var(--lens-m) + var(--gutter) - var(--period)), 0, 0);
