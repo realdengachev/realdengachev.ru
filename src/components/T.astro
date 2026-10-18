@@ -1,0 +1,11 @@
+---
+import { typo } from '../data/typo';
+import type { L } from '../data/content';
+
+interface Props {
+  l: L;
+}
+const { l } = Astro.props;
+---
+
+<span data-l="en" lang="en">{typo(l.en, 'en')}</span><span data-l="ru" lang="ru">{typo(l.ru, 'ru')}</span>

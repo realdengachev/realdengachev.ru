@@ -1,0 +1,101 @@
+@font-face {
+  font-family: 'Suisse Intl';
+  src: url('/fonts/SuisseIntl-Regular.woff2') format('woff2');
+  font-weight: 400 500; /* Book (макет) = Regular, пока нет отдельного файла */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Suisse Intl Fallback';
+  src: local('Arial');
+  size-adjust: 103%;
+  ascent-override: 93.5%;
+  descent-override: 26%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Courier New');
+  size-adjust: 100%;
+  ascent-override: 102%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--color-bg); -webkit-tap-highlight-color: transparent; }
+button { touch-action: manipulation; }
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-16);
+  line-height: var(--lh-150);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+img, svg { display: block; max-width: 100%; }
+ul { padding: 0; list-style: none; }
+p { text-wrap: pretty; }
+
+.u-label {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  line-height: var(--lh-140);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+/* ссылка: подчёркивание рисуем сами (ровно у текста, без «отвалившихся» линий шрифта);
+   при hover тёмное подчёркивание заново заполняется слева направо */
+.link {
+  --ul-base: var(--color-soft);
+  --ul-hover: var(--color-text);
+  --ul-up: 2px; /* на сколько поднять линию от низа области текста */
+  color: inherit; cursor: pointer; text-decoration: none;
+  background:
+    linear-gradient(var(--ul-hover), var(--ul-hover)) 0 calc(100% - var(--ul-up)) / 0% 1px no-repeat,
+    linear-gradient(var(--ul-base), var(--ul-base)) 0 calc(100% - var(--ul-up)) / 100% 1px no-repeat;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  transition: background-size 0.55s var(--ease-out);
+}
+.link:hover, .link:focus-visible { background-size: 100% 1px, 100% 1px; }
+@media (prefers-reduced-motion: reduce) { .link { transition: none; } }
+.link:focus-visible { outline: 1px solid var(--color-text); outline-offset: 3px; border-radius: 2px; }
+.u-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* reveal: чистый CSS, не зависит от JS (контент не может «застрять» скрытым) */
+@keyframes reveal {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: none; }
+}
+.motion [data-reveal] {
+  animation: reveal var(--dur-reveal) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion [data-reveal] { animation: none; }
+}
+
+/* язык: показываем только активную локаль */
+html[data-lang='ru'] [data-l='en'],
+html:not([data-lang='ru']) [data-l='ru'] { display: none; }
+html.lang-out [data-l] { opacity: 0; transition: opacity 0.18s var(--ease-out); }
+html.lang-in [data-l] { animation: lang-in 0.32s var(--ease-out) both; }
+@keyframes lang-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  html.lang-out [data-l] { transition: none; }
+  html.lang-in [data-l] { animation: none; }
+}
+
+/* принудительные переносы из макета — только там, где колонка достаточно широкая */
+@media (max-width: 899px) { .br-d { display: none; } }

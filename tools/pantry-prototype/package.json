@@ -1,0 +1,14 @@
+{
+  "name": "pantry-prototype",
+  "private": true,
+  "type": "module",
+  "description": "Прототип главного экрана Pantry и запись скринкаста для ленты кейсов",
+  "scripts": {
+    "serve": "node serve.mjs",
+    "record": "node record.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "5.2.0",
+    "puppeteer-core": "23.11.1"
+  }
+}

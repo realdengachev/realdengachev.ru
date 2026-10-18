@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Pantry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="clock.js"></script>
+</head>
+<body>
+  <main class="stage">
+    <div class="device" id="device">
+      <img class="device__buttons" src="assets/frame_buttons.png" alt="" draggable="false">
+      <img class="device__titanium" src="assets/frame_titanium.png" alt="" draggable="false">
+      <img class="device__bezel" src="assets/frame_screen.png" alt="" draggable="false">
+
+      <div class="screen" id="screen">
+        <div class="app" id="app">
+          <img class="status" src="assets/status.svg" alt="" draggable="false">
+
+          <button class="logo" id="logo" type="button" aria-label="Сбросить">
+            <img src="assets/logo.svg" alt="" draggable="false">
+          </button>
+
+          <button class="upload" type="button">
+            <span class="upload__icon"><img src="assets/upload.svg" alt="" draggable="false"></span>
+            <span class="upload__label">Upload</span>
+          </button>
+
+          <div class="stack" id="stack" aria-label="Фотографии"></div>
+
+          <section class="sheet">
+            <header class="pantry">
+              <h1 class="pantry__title">Pantry</h1>
+              <span class="pantry__count" id="pantryCount">( 6 )</span>
+            </header>
+          </section>
+
+          <div class="folders" id="folders"></div>
+        </div>
+        <canvas class="cloth" id="cloth"></canvas>
+      </div>
+
+      <img class="island" src="assets/island.svg" alt="" draggable="false">
+    </div>
+  </main>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="demo.js"></script>
+</body>
+</html>

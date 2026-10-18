@@ -1,0 +1,245 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { GalleryCard } from '../data/content';
+import T from './T.astro';
+
+interface Props {
+  card: GalleryCard;
+  eager?: boolean;
+}
+const { card, eager = false } = Astro.props;
+const loading = eager ? 'eager' : 'lazy';
+const poster = card.kind === 'phone-video' ? await getImage({ src: card.poster, width: 540, format: 'webp', quality: 85 }) : null;
+const widePoster = card.kind === 'wide-video' ? await getImage({ src: card.poster, width: 1240, format: 'webp', quality: 85 }) : null;
+---
+<div class:list={['card', card.kind.startsWith('wide') ? 'card--wide' : 'card--phone']}>
+  {
+    card.kind === 'wide' && (
+      <div class="card__plate card__plate--wide">
+        <div class="shot">
+          <Image
+            src={card.image}
+            alt={card.alt}
+            width={1240}
+            height={758}
+            quality={85}
+            format="webp"
+            loading={loading}
+            fetchpriority={eager ? 'high' : 'auto'}
+            decoding="async"
+            draggable="false"
+            class="shot__img"
+            style={card.fillH ? `height:${card.fillH}%;top:${card.fillTop}%` : undefined}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    card.kind === 'wide-video' && widePoster && (
+      <div class="card__plate card__plate--wide">
+        <div class="shot" role="img" aria-label={card.alt}>
+          <video
+            class="shot__img shot__video"
+            data-case-video
+            data-src={card.video}
+            poster={widePoster.src}
+            width="1240"
+            height="758"
+            muted
+            loop
+            playsinline
+            disablepictureinpicture
+            preload="none"
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    (card.kind === 'phone-ios16' || card.kind === 'phone-video') && (
+      <div class="card__plate card__plate--phone">
+        <div class="ios" role="img" aria-label={card.alt}>
+          <div class="ios__buttons" aria-hidden="true">
+            <i class="ios__btn ios__btn--a" />
+            <i class="ios__btn ios__btn--b" />
+            <i class="ios__btn ios__btn--c" />
+            <i class="ios__btn ios__btn--r" />
+          </div>
+          <div class="ios__frame" aria-hidden="true">
+            <i class="ios__ring ios__ring--outer" />
+            <i class="ios__ring ios__ring--dark" />
+            <i class="ios__ring ios__ring--inner" />
+            <i class="ios__ring ios__ring--hl" />
+          </div>
+          <div class="ios__bezel" aria-hidden="true" />
+          <div class="ios__screen">
+            {card.kind === 'phone-ios16' && (
+              <Image src={card.wallpaper} alt="" width={360} height={766} quality={85} format="webp" loading={loading} decoding="async" draggable="false" />
+            )}
+            {card.kind === 'phone-video' && poster && (
+              <video
+                class="ios__video"
+                data-case-video
+                src={card.lazy ? undefined : card.video}
+                data-src={card.lazy ? card.video : undefined}
+                poster={poster.src}
+                width="540"
+                height="1148"
+                muted
+                loop
+                playsinline
+                disablepictureinpicture
+                preload={card.lazy ? 'none' : 'metadata'}
+                aria-hidden="true"
+              />
+            )}
+          </div>
+          {!(card.kind === 'phone-video' && card.bare) && (
+            <>
+            <img class="ios__island" src="/img/dynamic-island.svg" alt="" width="50" height="14" draggable="false" />
+            <div class="ios__status" aria-hidden="true">
+              <span class="ios__time">9:41</span>
+              <img class="ios__icons" src="/img/status-icons.svg" alt="" width="34" height="6" draggable="false" />
+            </div>
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  <div class="card__cap">
+    <p class="card__cap-in">
+      <span class="card__cap-name link"><T l={card.caption.name} /></span>
+      <span class="card__cap-text"><T l={card.caption.text} /></span>
+    </p>
+  </div>
+</div>
+
+<style>
+  .card { display: flex; flex-direction: column; gap: var(--gap-12); flex: none; }
+  .card--wide { width: 700px; }
+  .card--phone { width: 300px; }
+
+  .card__plate {
+    position: relative;
+    height: 459px;
+    overflow: hidden;
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    box-shadow: inset 0 0 0 1px var(--color-ring);
+  }
+  .card__plate--wide { padding: var(--gap-40); }
+
+  .shot {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2880 / 1760;
+    border-radius: var(--radius-media);
+    overflow: hidden;
+  }
+  .shot :global(.shot__video) { display: block; pointer-events: none; background: #fff; }
+  .shot :global(.shot__img) { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; max-width: none; }
+
+  /* подпись: при hover выезжает сверху вниз */
+  .card__cap { height: 24px; overflow: hidden; zoom: calc(1 / var(--gz)); } /* подпись не уменьшается вместе с карточкой */
+  .card__cap-in {
+    display: flex; align-items: center; gap: var(--gap-8);
+    height: 24px; white-space: nowrap;
+    transition: transform 0.35s var(--ease-out), opacity 0.25s var(--ease-out);
+  }
+  .card__cap-name { cursor: inherit; font-family: var(--font-mono); font-size: var(--fs-16); line-height: var(--lh-140); color: var(--color-text); }
+  .card__cap-text { font-size: var(--fs-16); line-height: var(--lh-150); color: var(--color-muted); }
+  @media (hover: hover) {
+    .card__cap-in { transform: translate3d(0, -100%, 0); opacity: 0; }
+    .card:hover .card__cap-in { transform: none; opacity: 1; }
+    .card:hover .card__cap-name { background-size: 100% 1px, 100% 1px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card__cap-in { transition: none; }
+  }
+
+  /* iPhone 16 Plus Dark — 62:1420 */
+  .ios { position: absolute; left: 58px; top: 40px; width: 183.88px; height: 379px; }
+  .ios > * { position: absolute; }
+  .ios__buttons { left: -1.348px; top: 66.988px; width: 186.578px; height: 300.772px; }
+  .ios__btn {
+    position: absolute; left: 0; width: 2.248px;
+    border-radius: 0.899px 0 0 0.899px;
+    background: linear-gradient(90deg, #000 0%, #2a2a2a 100%);
+    box-shadow: inset 0.45px 0 0 rgba(255,255,255,.35);
+  }
+  .ios__btn--a { top: 0; height: 13.937px; }
+  .ios__btn--b { top: 27.42px; height: 25.177px; }
+  .ios__btn--c { top: 59.79px; height: 25.177px; }
+  .ios__btn--r { left: 184.33px; top: 43.61px; height: 44.958px; border-radius: 0 0.899px 0.899px 0; transform: none; background: linear-gradient(270deg, #000 0%, #2a2a2a 100%); box-shadow: inset -0.45px 0 0 rgba(255,255,255,.35); }
+
+  .ios__frame { inset: 0; border-radius: 27.874px; background: #000; overflow: hidden; }
+  .ios__ring { position: absolute; border-style: solid; border-radius: 27.874px; }
+  .ios__ring--outer { inset: 0; border: 1.349px solid #a0a0a0; filter: blur(0.899px); }
+  .ios__ring--dark { inset: 0; border: 0.45px solid #181818; filter: blur(0.45px); }
+  .ios__ring--inner { left: 2.248px; top: 2.248px; width: 179.384px; height: 374.055px; border: 0.45px solid #fff; filter: blur(0.45px); }
+  .ios__ring--hl { left: 2.7px; top: 2.7px; width: 178.485px; height: 373.155px; border: 0.18px solid #fff; }
+
+  .ios__bezel {
+    left: 1.8px; top: 1.8px; width: 180.284px; height: 375.403px;
+    border-radius: 26.076px; background: #000100; overflow: hidden;
+  }
+  .ios__bezel::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    border: 1.798px solid #879194; filter: blur(1.574px);
+  }
+  .ios__screen {
+    left: 5.4px; top: 5.4px; width: 173.09px; height: 368.21px;
+    border-radius: 23.378px; overflow: hidden; background: #dae2d3;
+  }
+  .ios__screen :global(img) { width: 100%; height: 100%; max-width: none; object-fit: fill; }
+  .ios__video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; background: #f0f1f3; }
+  .ios__island { left: 66.99px; top: 10.79px; width: 49.904px; height: 13.937px; max-width: none; }
+  /* статус-бар: часы и иконки по центрам «ушей» по обе стороны от острова, вертикально по центру острова */
+  .ios__status { left: 0; top: 0; width: 183.88px; height: 36px; pointer-events: none; }
+  .ios__time {
+    position: absolute; left: 36.2px; top: 12.82px; transform: translateX(-50%);
+    font: 600 7.64px / 9.891px -apple-system, 'SF Pro Text', system-ui, 'Helvetica Neue', Arial, sans-serif;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.1px; color: #0d0d0e; white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+  }
+  .ios__icons { position: absolute; left: 130.8px; top: 14.84px; width: 33.899px; height: 5.845px; max-width: none; }
+</style>
+
+<script>
+  // Скринкасты кейсов: играют только в зоне видимости, без звука и по кругу.
+  // При prefers-reduced-motion остаётся постер.
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const videos = [...document.querySelectorAll<HTMLVideoElement>('[data-case-video]')];
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        const v = e.target as HTMLVideoElement;
+        if (e.isIntersecting && !reduce.matches) {
+          // тяжёлые ролики подгружаем только когда карточка рядом с экраном
+          if (!v.getAttribute('src') && v.dataset.src) v.src = v.dataset.src;
+          v.play().catch(() => {});
+        }
+        else v.pause();
+      }
+    },
+    { rootMargin: '200px' },
+  );
+  for (const v of videos) {
+    v.muted = true;
+    io.observe(v);
+  }
+  reduce.addEventListener('change', () => {
+    for (const v of videos) {
+      v.pause();
+      io.unobserve(v);
+      io.observe(v); // наблюдатель заново решит, играть ли
+    }
+  });
+</script>

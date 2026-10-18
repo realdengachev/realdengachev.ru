@@ -1,0 +1,283 @@
+/* Все размеры — в единицах макета Figma (фрейм iPhone 16 Plus Light, 409×843).
+   Устройство масштабируется целиком через --scale. */
+
+:root {
+  --bg: #f0f1f3;
+  --ink: #191919;
+  --ink-strong: #000;
+  --muted: #9a9b9c;
+  --folder: #f6f6f6;
+  --folder-stroke: #e8e8e8;
+  --page: #f7f7f7;
+  --font: "Lebowski by Pragmatica", "Archivo", -apple-system, "Helvetica Neue", sans-serif;
+  --spring: cubic-bezier(.34, 1.4, .5, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--page);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body { font-family: var(--font); color: var(--ink); }
+
+/* Fallback (Archivo) подгоняем по ширине к Pragmatica */
+@supports (font-variation-settings: normal) {
+  body { font-stretch: 86%; }
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+img { display: block; user-select: none; -webkit-user-drag: none; }
+
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+/* ───────── Device ───────── */
+
+.device {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 409px;
+  height: 843px;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  transform-origin: center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 409px;
+  height: 843px;
+  z-index: 10;
+  opacity: .5;
+  pointer-events: none;
+}
+
+.device__buttons  { position: absolute; left: -3px; top: 149px; width: 415px; height: 669px; }
+.device__titanium { position: absolute; left: 0;   top: 0;     width: 409px; height: 843px; }
+.device__bezel    { position: absolute; left: 4px; top: 4px;   width: 401px; height: 835px; }
+.island           { position: absolute; left: 149px; top: 24px; z-index: 5; pointer-events: none; }
+
+.screen {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 385px;
+  height: 819px;
+  border-radius: 52px;
+  overflow: hidden;
+  background: var(--bg);
+  isolation: isolate;
+  touch-action: none;
+}
+
+.app {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 385px;
+  height: 834.66px;
+  background: var(--bg);
+}
+
+.cloth {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 385px;
+  height: 819px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Мобильный режим: без рамки, экран на всю ширину */
+.is-bare .device__buttons,
+.is-bare .device__titanium,
+.is-bare .device__bezel,
+.is-bare .island,
+.is-bare .status { display: none; }
+.is-bare .device {
+  left: 0;
+  top: 0;
+  width: 385px;
+  height: 819px;
+  transform: scale(var(--scale, 1));
+  transform-origin: top left;
+}
+.is-bare .screen { left: 0; top: 0; border-radius: 0; }
+
+/* ───────── Header ───────── */
+
+.status { position: absolute; left: 56px; top: 17px; }
+
+.logo {
+  position: absolute;
+  left: 15.67px;
+  top: 64.66px;
+  transition: transform .5s var(--spring);
+}
+.logo:active { transform: scale(.92); transition-duration: .12s; }
+
+.upload {
+  position: absolute;
+  right: 15.9px;
+  top: 61.72px;
+  height: 39.19px;
+  display: flex;
+  align-items: center;
+  gap: 4.9px;
+  padding: 7.84px 10.78px 7.84px 7.84px;
+  border-radius: 11.76px;
+  background: #fff;
+  transition: transform .5s var(--spring), box-shadow .3s var(--ease-out);
+}
+.upload:active { transform: scale(.95); transition-duration: .12s; }
+.upload__icon { width: 17.63px; height: 17.63px; display: grid; place-items: center; }
+.upload__label { font-size: 13.715px; line-height: 18px; color: var(--ink); }
+
+/* ───────── Photo stack ───────── */
+
+.stack { position: absolute; inset: 0; pointer-events: none; }
+
+.photo {
+  position: absolute;
+  width: 118.97px;
+  height: 169.96px;
+  border-radius: 13.597px;
+  overflow: hidden;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  background: #ddd;
+  will-change: transform;
+}
+.photo img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.photo.is-hidden { visibility: hidden; }
+.is-dragging, .is-dragging * { cursor: grabbing !important; }
+
+/* ───────── Sheet ───────── */
+
+.sheet {
+  position: absolute;
+  left: 0;
+  top: 447.7px;
+  width: 385px;
+  height: 434.96px;
+  background: #fff;
+  border-radius: 47.023px 47.023px 0 0;
+}
+
+.pantry {
+  position: absolute;
+  top: 19.59px; /* 467.29 − 447.70 */
+  left: 138.13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 7.56px;
+  white-space: nowrap;
+}
+.pantry__title {
+  font-size: 39.186px;
+  line-height: 135%;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+.pantry__count {
+  margin-top: 7.84px;
+  font-size: 13.715px;
+  line-height: 18px;
+  color: var(--ink);
+  opacity: .4;
+}
+
+/* ───────── Folders ───────── */
+
+.folders { position: absolute; inset: 0; pointer-events: none; }
+
+.folder {
+  position: absolute;
+  width: 169.48px;
+  height: 169.48px;
+  transition: transform .55s var(--spring);
+  transform-origin: center;
+}
+
+.folder__bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 39.186px;
+  background: var(--folder);
+  border: .98px solid var(--folder-stroke);
+  box-shadow:
+    inset 0 3.92px 11.76px rgba(0, 0, 0, .04),
+    inset 0 -3.92px 11.76px rgba(0, 0, 0, .04);
+  transition: background-color .35s var(--ease-out), border-color .35s var(--ease-out);
+}
+.folder__bg::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(25, 25, 25, 0), 0 14px 28px -12px rgba(0, 0, 0, 0);
+  transition: box-shadow .45s var(--ease-out);
+}
+
+.thumb {
+  position: absolute;
+  width: 45.5px;
+  height: 65px;
+  border-radius: 7.837px;
+  overflow: hidden;
+  transition: translate .55s var(--spring), rotate .55s var(--spring), opacity .4s var(--ease-out), scale .55s var(--spring);
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb.is-leaving { opacity: 0; scale: .8; }
+
+/* Папка-цель при наведении: раскрывается, фото расходятся веером */
+.folder.is-target { transform: scale(1.06); }
+.folder.is-target .folder__bg { background: #f1f1f2; border-color: #dedfe1; }
+.folder.is-target .folder__bg::after {
+  box-shadow: 0 0 0 1.5px rgba(25, 25, 25, .07), 0 18px 30px -14px rgba(0, 0, 0, .18);
+}
+.folder.is-target .thumb {
+  translate: calc(var(--fx) * 9px) calc(var(--fy) * 9px);
+  rotate: calc(var(--fr) * 1deg);
+}
+
+.label {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 4.9px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.label__name { font-size: 17.634px; line-height: 23px; color: var(--ink); }
+.label__count {
+  position: relative;
+  font-size: 11.756px;
+  line-height: 15px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  height: 15px;
+}
+.label__count span { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .folder, .thumb, .logo, .upload { transition-duration: .01s !important; }
+}
+
+/* Внутри телефона курсор скрыт — и в покое, и во время перетаскивания */
+.device,
+.device *,
+.is-dragging .device,
+.is-dragging .device * { cursor: none !important; }

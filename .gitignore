@@ -1,0 +1,8 @@
+node_modules
+dist
+.astro
+.claude
+.DS_Store
+# внутренние заметки и исходники шрифтов не публикуем
+docs
+*.ttf

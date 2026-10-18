@@ -1,0 +1,342 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import GalleryCard from '../components/GalleryCard.astro';
+import WorkEntry from '../components/WorkEntry.astro';
+import T from '../components/T.astro';
+import ThemeLang from '../components/ThemeLang.astro';
+import { ext } from '../data/links';
+import { profile, experience, workingAt, developing, built, tabs, ui, gallery, workGroups, connectLinks, copiedLabel, footer, story } from '../data/content';
+
+const SETS = 4; // 1 реальный + клоны для бесконечной ленты
+---
+
+<Base>
+  <main class="work" data-work>
+    <div class="work__stage" data-stage>
+      <ThemeLang />
+
+      <div class="page">
+        <div class="avatar" data-reveal style="--i:3">
+          <Image
+            src={profile.avatar}
+            alt={profile.avatarAlt}
+            width={240}
+            height={240}
+            quality={90}
+            format="webp"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+
+        <div class="intro">
+          <div class="text" data-reveal style="--i:4">
+            <h1 class="text__label u-label"><T l={profile.name} /></h1>
+            <p class="text__body"><T l={profile.about} /></p>
+          </div>
+          <div class="text text--exp" data-reveal style="--i:5">
+            <h2 class="text__label u-label"><T l={experience.label} /></h2>
+            <p class="text__body">
+              {experience.segments.map((seg) =>
+                'br' in seg ? <br class="br-d" /> : 'link' in seg ? <a class="link" href={seg.href} {...ext}><T l={seg.link} /></a> : <T l={seg} />,
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div class="facts">
+          <div class="fact fact--work" data-reveal style="--i:6">
+            <h2 class="fact__label u-label"><T l={workingAt.label} /></h2>
+            <div class="fact__row">
+              <Image class="app-icon" src={workingAt.icon} alt="" width={112} height={112} quality={90} format="webp" loading="eager" />
+              <div class="fact__text">
+                <p class="fact__title"><a class="link" href={workingAt.href} {...ext}>{workingAt.company}</a></p>
+                <p class="fact__sub"><T l={workingAt.role} /></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="fact fact--dev" data-reveal style="--i:7">
+            <h2 class="fact__label u-label"><T l={developing.label} /></h2>
+            <div class="fact__row">
+              <Image class="app-icon" src={developing.icon} alt="" width={112} height={112} quality={90} format="webp" loading="eager" />
+              <div class="fact__text">
+                <p class="fact__title"><a class="link" href={developing.href} {...ext}><T l={developing.name} /></a></p>
+                <p class="fact__sub"><T l={developing.role} /></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="fact fact--built" data-reveal style="--i:8">
+            <h2 class="fact__label u-label"><T l={built.label} /></h2>
+            <div class="fact__row">
+              <Image class="app-icon" src={built.icon} alt="" width={112} height={112} quality={90} format="webp" loading="eager" />
+              <div class="fact__text">
+                <p class="fact__title"><a class="link" href={built.href} {...ext}><T l={built.name} /></a></p>
+                <p class="fact__sub fact__sub--built"><T l={built.description} /></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label={ui.tablist.en} data-aria-ru={ui.tablist.ru} data-reveal style="--i:9">
+          {tabs.map((t) => (
+            <button class="tabs__tab" role="tab" type="button" id={`tab-${t.id}`} aria-controls={`panel-${t.id}`} aria-selected={t.id === 'all' ? 'true' : 'false'} tabindex={t.id === 'all' ? 0 : -1} data-tab={t.id}>
+              <T l={t.label} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div class="panels" data-panels>
+        <section class="panel panel--all" id="panel-all" role="tabpanel" aria-labelledby="tab-all">
+          <div class="gallery" aria-label={ui.gallery.en} data-aria-ru={ui.gallery.ru} data-gallery data-enter data-reveal style="--i:10" role="region">
+            <div class="gallery__lens" data-lens>
+              <div class="gallery__track" data-track>
+                {Array.from({ length: SETS }, (_, i) => (
+                  <div class="gallery__set" data-set data-clone={i > 0 ? '' : undefined} aria-hidden={i > 0 ? 'true' : undefined}>
+                    {gallery.map((card, n) => <GalleryCard card={card} eager={i === 0 && n < 2} />)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel--work" id="panel-work" role="tabpanel" aria-labelledby="tab-work">
+          <div class="page wk">
+            {workGroups.map((g, gi) => (
+              <>
+                {gi > 0 && <div class="divider" data-enter aria-hidden="true" />}
+                <div class:list={['group', { 'group--live': g.live }]} data-enter>
+                  <div class="group__head">
+                    <p class="group__period u-label">
+                      {g.live && <i class="group__dot" aria-hidden="true" />}
+                      <span><T l={g.period} /></span>
+                    </p>
+                    <p class="group__role">
+                      {g.company && g.href ? (
+                        <>
+                          <T l={{ en: `${g.role.en} `, ru: `${g.role.ru} ` }} />
+                          <a class="link" href={g.href} {...ext}><T l={g.company} /></a>
+                        </>
+                      ) : (
+                        <T l={g.role} />
+                      )}
+                    </p>
+                  </div>
+                  <div class="group__body">
+                    {g.entries.map((e) => <WorkEntry entry={e} />)}
+                  </div>
+                </div>
+              </>
+            ))}
+          </div>
+        </section>
+
+        <section class="panel panel--story" id="panel-story" role="tabpanel" aria-labelledby="tab-story">
+          <div class="page story">
+            {story.map((p) => (
+              <p class="story__p" data-enter>
+                {p.lines.map((line, i) => (
+                  <>
+                    {i > 0 && <br />}
+                    {line.map((seg) =>
+                      'link' in seg ? <a class="link" href={seg.href} {...ext}><T l={seg.link} /></a> : 'muted' in seg ? <span class="story__muted"><T l={seg.muted} /></span> : <T l={seg} />,
+                    )}
+                  </>
+                ))}
+              </p>
+            ))}
+          </div>
+        </section>
+
+        <section class="panel panel--connect" id="panel-connect" role="tabpanel" aria-labelledby="tab-connect">
+          <ul class="page connect">
+            {connectLinks.map((c) => (
+              <li data-enter>
+                {'copy' in c ? (
+                  <a class="link" href={c.href} data-copy={c.copy}>
+                    <span class="copy__label"><T l={c.label} /></span>
+                    <span class="copy__done" aria-hidden="true"><T l={copiedLabel} /></span>
+                  </a>
+                ) : (
+                  <a class="link" href={c.href} {...ext}><T l={c.label} /></a>
+                )}
+              </li>
+            ))}
+            <li class="u-sr" role="status" aria-live="polite" data-copy-status></li>
+          </ul>
+        </section>
+      </div>
+
+      <footer class="footer">
+        <div class="footer__divider" aria-hidden="true"></div>
+        <div class="page footer__row u-label">
+          <span>{footer.handle}</span>
+          <span>{footer.year}</span>
+        </div>
+      </footer>
+      <svg class="u-sr" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="lens" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feImage data-lens-map result="map" preserveAspectRatio="none" />
+            <feDisplacementMap data-lens-disp in="SourceGraphic" in2="map" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .work { position: relative; }
+  .work__stage {
+    position: relative;
+    display: flex; flex-direction: column;
+    min-height: 100svh;
+    padding: 120px max(0px, env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(0px, env(safe-area-inset-left)); /* 20px — отступ футера до нижнего края */
+    overflow: hidden;
+  }
+
+  .page { width: min(var(--content-w), calc(100% - var(--page-pad) * 2)); margin: 0 auto; }
+  .avatar { width: 120px; height: 120px; border-radius: var(--radius-avatar); overflow: hidden; }
+  .avatar :global(img) { width: 100%; height: 100%; object-fit: cover; }
+
+  .intro { display: grid; grid-template-columns: minmax(0, 400fr) minmax(0, 368fr); column-gap: var(--gap-32); margin-top: 38px; }
+  .text { display: flex; flex-direction: column; gap: var(--gap-8); }
+  .text__label { font-size: var(--fs-16); font-weight: 400; }
+  .text__body { font-size: var(--fs-16); line-height: var(--lh-150); color: var(--color-text); }
+  .text--exp .text__body { max-width: none; }
+
+  .facts { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px 64px; margin-top: 48px; }
+  .fact { display: flex; flex-direction: column; }
+  .fact--work, .fact--dev { gap: var(--gap-12); }
+  .fact--built { gap: 9px; }
+  .fact__label { font-size: var(--fs-16); font-weight: 400; }
+  .fact__row { display: flex; align-items: center; gap: var(--gap-12); }
+  .fact--work .fact__text { min-width: 136px; }
+  .fact--built .fact__row { max-width: 282px; }
+  .fact__text { display: flex; flex-direction: column; gap: 4px; }
+  .fact__title { font-size: var(--fs-16); line-height: var(--lh-140); color: var(--color-text); font-weight: 450; }
+  .fact__sub { font-size: var(--fs-14); line-height: var(--lh-130); color: var(--color-muted); }
+  .fact__sub--built { max-width: 174px; }
+
+  .app-icon { flex: none; width: 56px; height: 56px; border-radius: 14px; object-fit: cover; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px clamp(16px, 5.5vw, 32px); margin-top: 61px; }
+  .tabs__tab {
+    padding: 0; border: 0; background: none; cursor: pointer; touch-action: manipulation;
+    font: 400 var(--fs-16) / var(--lh-140) var(--font-mono); text-transform: uppercase;
+    color: var(--color-muted);
+    transition: color var(--dur-tab) var(--ease-out);
+  }
+  .tabs__tab:hover, .tabs__tab[aria-selected='true'] { color: var(--color-text); }
+  .tabs__tab:focus-visible { outline: 1px solid var(--color-text); outline-offset: 4px; border-radius: 2px; }
+
+  /* панели: видимость задаёт html[data-tab] (ставится инлайн-скриптом до отрисовки — без мигания) */
+  .panels { width: 100%; }
+  .panel { display: none; }
+  :global(html:not([data-tab])) .panel--all,
+  :global(html[data-tab='all']) .panel--all,
+  :global(html[data-tab='work']) .panel--work,
+  :global(html[data-tab='story']) .panel--story,
+  :global(html[data-tab='connect']) .panel--connect { display: flow-root; }
+  .panel { padding-top: var(--gap-tab); } /* от таба до контента везде 40px */
+  .panel--all { padding-bottom: 44px; } /* + 20px паддинга сцены = 64px от ленты до низа (на мобильном 40px) */
+
+  /* Work */
+  .wk { display: flex; flex-direction: column; gap: 64px; }
+  .group { display: flex; gap: var(--gap-32); align-items: flex-start; }
+  .group__head { display: flex; flex-direction: column; flex: none; width: 200px; gap: var(--gap-8); }
+  .group--live .group__head { gap: var(--gap-12); }
+  .group__body { display: flex; flex: 1 1 0; min-width: 0; flex-direction: column; gap: 40px; }
+  .group__period { display: flex; align-items: center; gap: var(--gap-8); font-size: var(--fs-16); }
+  .group__dot { display: block; width: 8px; height: 8px; border-radius: 50%; background: #3dd93b; flex: none; }
+  .group__role { font-family: var(--font-mono); font-size: var(--fs-16); line-height: var(--lh-140); color: var(--color-text); }
+  .divider { width: min(720px, 100%); height: 1px; margin-inline: auto; background: var(--color-divider); }
+
+  /* Story */
+  .story { display: flex; flex-direction: column; gap: 24px; }
+  .story__muted { color: var(--color-muted); }
+  .story__p { max-width: 740px; font-size: var(--fs-16); line-height: var(--lh-150); color: var(--color-text); }
+
+  /* Connect */
+  .connect { display: flex; flex-direction: column; gap: 24px; align-items: flex-start; }
+  .connect .link {
+    position: relative; display: inline-block; font-family: var(--font-mono); font-size: var(--fs-16); line-height: var(--lh-140); text-transform: uppercase;
+  }
+  .connect .copy__done { display: none; }
+  .connect .link[data-copied] .copy__label { display: none; }
+  .connect .link[data-copied] .copy__done { display: inline; }
+  .connect .link::before { content: ''; position: absolute; inset: -12px -6px; } /* зона нажатия ≥ 44px */
+
+  /* ---------- адаптив ---------- */
+  /* ноутбук 1024–1439: макет 800px по центру, без изменений */
+  /* планшет 768–1023 */
+  @media (max-width: 1023px) {
+    .work__stage { padding-top: 104px; }
+  }
+  /* мобильный ≤ 767 */
+  @media (max-width: 767px) {
+    .work__stage { padding-top: 88px; }
+    .panel--all { padding-bottom: 20px; }
+    .avatar { width: 96px; height: 96px; }
+    .intro { grid-template-columns: minmax(0, 1fr); row-gap: 24px; margin-top: 32px; }
+    .text--exp .text__body { max-width: none; }
+    .facts { margin-top: 40px; gap: 28px 48px; }
+    .tabs { margin-top: 48px; }
+    .wk { gap: 48px; }
+    .group { flex-direction: column; gap: 16px; }
+    .group__head { width: auto; }
+    .group__body { gap: 32px; width: 100%; }
+  }
+  @media (pointer: coarse) {
+    .tabs__tab { padding-block: 12px; margin-block: -12px; }
+  }
+  /* узкие телефоны: длинные подписи («EXPERIENCE») не должны переноситься на вторую строку */
+  @media (max-width: 399px) { .tabs { column-gap: 12px; } }
+  @media (max-width: 339px) { .tabs__tab { font-size: var(--fs-14); } }
+  .group__role .link { --ul-up: 2px; white-space: nowrap; } /* «в Т-Банк» не рвётся по дефису */
+
+  /* footer — на всех разделах, кроме All; прижат к низу, 64px от контента, 20px до края */
+  .footer { display: flex; flex-direction: column; gap: 64px; margin-top: auto; padding-top: 64px; }
+  .footer__divider { width: min(720px, 100%); height: 1px; margin-inline: auto; background: var(--color-divider); }
+  :global(html:not([data-tab])) .footer,
+  :global(html[data-tab='all']) .footer { display: none; }
+  .footer__row { display: flex; justify-content: space-between; font-size: var(--fs-14); white-space: nowrap; }
+
+  /* gallery: независимый блок, высота страницы от него не зависит */
+  .gallery { --lens-m: 160px; --period: calc(2764px * var(--gz) + var(--gap-16) * var(--gz)); position: relative; overflow-x: auto; scrollbar-width: none; padding: 0 var(--gutter); }
+  .gallery::-webkit-scrollbar { display: none; }
+  .gallery__track { display: flex; gap: calc(16px * var(--gz)); width: max-content; }
+  .gallery__set { display: flex; align-items: flex-start; gap: var(--gap-16); zoom: var(--gz); } /* карточки масштабируются целиком (zoom влияет на layout) */
+  .gallery__set[data-clone] { display: none; }
+
+  :global(.motion) .gallery {
+    --bleed: 32px; /* запас по вертикали: у краёв карточки увеличиваются и выходят за свои границы */
+    overflow: hidden; margin-block: calc(var(--bleed) * -1); padding: var(--bleed) 0; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  }
+  :global(.motion) .gallery.is-dragging { cursor: grabbing; }
+  :global(.motion) .gallery__lens {
+    margin: calc(var(--bleed) * -1) calc(var(--lens-m) * -1); padding: var(--bleed) 0; filter: url(#lens);
+  }
+  /* линза (SVG-фильтр) — только на десктопе с мышью: на мобильных GPU и в Safari iOS дорого/нестабильно */
+  @media (max-width: 1023px), (hover: none) {
+    :global(.motion) .gallery__lens { filter: none; }
+  }
+  :global(.motion) .gallery__set[data-clone] { display: flex; }
+  :global(.motion) .gallery__track {
+    transform: translate3d(calc(var(--lens-m) + var(--gutter) - var(--period)), 0, 0);
+  }
+  :global(.motion) .gallery.is-moving .gallery__track { will-change: transform; }
+  :global(.motion) .gallery :global(img) { -webkit-user-drag: none; }
+</style>
+
+<script>
+  import '../scripts/motion';
+  import '../scripts/tabs';
+  import '../scripts/copy';
+  import '../scripts/controls';
+</script>
