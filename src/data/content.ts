@@ -34,7 +34,7 @@ export const site = {
   title: 'Kirill Dengachev — Lead UX/UI designer',
   titleRu: 'Кирилл Деньгачев — Lead UX/UI дизайнер',
   description:
-    'Kirill Dengachev — Lead UX/UI designer at Deep Digital. Creative, emotionally engaging solutions for large-scale banking products, design systems and team workflows.',
+    'Develop creative and emotionally engaging solutions for large-scale banking products, create design systems and improve team workflows',
 };
 
 /* ---------- UI: тема и язык ---------- */

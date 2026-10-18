@@ -7,7 +7,9 @@ const DRAG_FOLLOW = 28;
 const FLING = 0.22; // секунд «инерции» после отпускания drag
 const LENS_MARGIN = 160; // запас по краям линзы, px (= --lens-m в CSS)
 // мягкий «изгиб» к краям экрана (как arseniivostrikov.com): без цветовых смещений, только лёгкая кривизна: у краёв карточки крупнее, к центру — обычный размер
-const LENS = { shiftX: 0.03, squeezeY: 0.06, start: 0.55 };
+const LENS_FULL = { shiftX: 0.03, squeezeY: 0.06, start: 0.55 };
+const LENS_SOFT = { shiftX: 0.022, squeezeY: 0.04, start: 0.5 }; // мобильный: мягче
+const isCompact = (): boolean => matchMedia('(max-width: 767px)').matches;
 
 const root = document.documentElement;
 
@@ -16,15 +18,14 @@ function setupLens(gallery: HTMLElement, lens: HTMLElement): () => void {
   const disp = document.querySelector<SVGFEDisplacementMapElement>('[data-lens-disp]');
   if (!map || !disp) return () => {};
 
-  const desktopLens = matchMedia('(min-width: 1024px) and (hover: hover)');
   const build = (): void => {
-    if (!desktopLens.matches) return; // на мобильных/планшетах линза отключена (CSS: filter: none)
     const vw = gallery.clientWidth;
     const w = vw + LENS_MARGIN * 2;
     const h = lens.offsetHeight;
     if (!vw || !h) return;
     const half = vw / 2;
-    const maxShift = Math.max(LENS.shiftX * half, LENS.squeezeY * (h / 2));
+    const L = isCompact() ? LENS_SOFT : LENS_FULL;
+    const maxShift = Math.max(L.shiftX * half, L.squeezeY * (h / 2));
     const range = Math.max(maxShift * 2 * 1.15, 24); // диапазон карты смещений (px)
 
     const cw = Math.ceil(w / 2);
@@ -39,9 +40,9 @@ function setupLens(gallery: HTMLElement, lens: HTMLElement): () => void {
       const y = (j + 0.5) * 2;
       for (let i = 0; i < cw; i++) {
         const u = ((i + 0.5) * 2 - w / 2) / half;
-        const z = lensZone(u, LENS.start);
-        const dx = -Math.sign(u) * LENS.shiftX * half * z; // берём источник ближе к центру → у краёв карточки крупнее
-        const dy = -(y - h / 2) * LENS.squeezeY * z;
+        const z = lensZone(u, L.start);
+        const dx = -Math.sign(u) * L.shiftX * half * z; // берём источник ближе к центру → у краёв карточки крупнее
+        const dy = -(y - h / 2) * L.squeezeY * z;
         const k = (j * cw + i) * 4;
         img.data[k] = Math.round(255 * (0.5 + dx / range));
         img.data[k + 1] = Math.round(255 * (0.5 + dy / range));
@@ -60,11 +61,9 @@ function setupLens(gallery: HTMLElement, lens: HTMLElement): () => void {
 
   const ro = new ResizeObserver(build);
   ro.observe(gallery);
-  desktopLens.addEventListener('change', build);
   build();
   return () => {
     ro.disconnect();
-    desktopLens.removeEventListener('change', build);
   };
 }
 

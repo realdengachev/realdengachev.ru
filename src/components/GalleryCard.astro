@@ -154,6 +154,9 @@ const widePoster = card.kind === 'wide-video' ? await getImage({ src: card.poste
   }
   .card__cap-name { cursor: inherit; font-family: var(--font-mono); font-size: var(--fs-16); line-height: var(--lh-140); color: var(--color-text); }
   .card__cap-text { font-size: var(--fs-16); line-height: var(--lh-150); color: var(--color-muted); }
+  @media (max-width: 767px) {
+    .card__cap-name, .card__cap-text { font-size: 12px; }
+  }
   @media (hover: hover) {
     .card__cap-in { transform: translate3d(0, -100%, 0); opacity: 0; }
     .card:hover .card__cap-in { transform: none; opacity: 1; }

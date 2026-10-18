@@ -38,6 +38,8 @@ const dict = {
     position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(var(--page-pad), calc((100% - var(--content-w)) / 2)); z-index: 5;
     display: flex; gap: 8px;
   }
+  /* на мобильном шапка закреплена: в неё «втягивается» аватар */
+  :global(html.avfx-on) .controls { position: fixed; z-index: 30; }
   .ctl {
     --w-open: 96px;
     display: flex; align-items: center; flex: none;
@@ -65,12 +67,14 @@ const dict = {
   }
   .ctl__label:global(.is-swap) { opacity: 0 !important; filter: blur(3px) !important; transition-duration: 0.12s !important; transition-delay: 0s !important; }
 
-  @media (hover: none) {
-    .ctl:hover { width: 32px; }
+  /* мобильный: подпись не выдвигается — иконка просто переключает значение */
+  @media (hover: none), (max-width: 767px) {
+    .ctl:hover, .ctl:focus-visible { width: 32px; }
+    .ctl__label { display: none; }
   }
   /* тач: увеличиваем кнопки до 40px (зона нажатия), подпись не раскрываем */
   @media (pointer: coarse) {
-    .ctl, .ctl:hover { width: 40px; height: 40px; padding-left: 12px; }
+    .ctl, .ctl:hover, .ctl:focus-visible { width: 40px; height: 40px; padding-left: 12px; }
     .controls { gap: 8px; }
   }
   @media (prefers-reduced-motion: reduce) {

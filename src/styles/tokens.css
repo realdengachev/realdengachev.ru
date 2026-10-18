@@ -88,7 +88,7 @@
 /* масштаб галереи: ноутбук 1, планшет .85/.7, мобильный .6/.5/.43/.38 */
 @media (max-width: 1023px) { :root { --gz: 0.85; } }
 @media (max-width: 767px) { :root { --gz: 0.7; } }
-@media (max-width: 599px) { :root { --gz: 0.6; } }
-@media (max-width: 479px) { :root { --gz: 0.5; } }
-@media (max-width: 399px) { :root { --gz: 0.43; } }
-@media (max-width: 359px) { :root { --gz: 0.38; } }
+@media (max-width: 599px) { :root { --gz: 0.62; } }
+@media (max-width: 479px) { :root { --gz: 0.52; } }
+@media (max-width: 399px) { :root { --gz: 0.44; } }
+@media (max-width: 359px) { :root { --gz: 0.35; } }

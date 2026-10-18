@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import GalleryCard from '../components/GalleryCard.astro';
 import WorkEntry from '../components/WorkEntry.astro';
@@ -8,6 +8,7 @@ import ThemeLang from '../components/ThemeLang.astro';
 import { ext } from '../data/links';
 import { profile, experience, workingAt, developing, built, tabs, ui, gallery, workGroups, connectLinks, copiedLabel, footer, story } from '../data/content';
 
+const avatarFx = await getImage({ src: profile.avatar, width: 240, format: 'webp', quality: 90 });
 const SETS = 4; // 1 реальный + клоны для бесконечной ленты
 ---
 
@@ -15,6 +16,28 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   <main class="work" data-work>
     <div class="work__stage" data-stage>
       <ThemeLang />
+
+      <!-- мобильная анимация аватара: при скролле фото «втягивается» в шапку (метабол-эффект как в Telegram) -->
+      <div class="avfx-bar" data-avfx-bar aria-hidden="true"></div>
+      <svg class="avfx" data-avfx width="100%" height="300" aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="avfx-goo" filterUnits="userSpaceOnUse" x="0" y="0" width="100%" height="300" color-interpolation-filters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b" />
+            <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
+          </filter>
+          <mask id="avfx-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="300">
+            <g filter="url(#avfx-goo)">
+              <circle data-fx="m" fill="#fff" cx="0" cy="0" r="0" />
+              <circle data-fx="a" fill="#fff" cx="0" cy="0" r="0" />
+            </g>
+          </mask>
+          <clipPath id="avfx-clip-m"><circle data-fx="cm" cx="0" cy="0" r="0" /></clipPath>
+          <clipPath id="avfx-clip-a"><circle data-fx="ca" cx="0" cy="0" r="0" /></clipPath>
+        </defs>
+        <rect x="0" y="0" width="100%" height="300" fill="#16285f" mask="url(#avfx-mask)" />
+        <image data-fx="im" href={avatarFx.src} preserveAspectRatio="xMidYMid slice" clip-path="url(#avfx-clip-m)" />
+        <image data-fx="ia" href={avatarFx.src} preserveAspectRatio="xMidYMid slice" clip-path="url(#avfx-clip-a)" />
+      </svg>
 
       <div class="page">
         <div class="avatar" data-reveal style="--i:3">
@@ -172,7 +195,7 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
       </div>
 
       <footer class="footer">
-        <div class="footer__divider" aria-hidden="true"></div>
+        <div class="page"><div class="footer__divider" aria-hidden="true"></div></div>
         <div class="page footer__row u-label">
           <span>{footer.handle}</span>
           <span>{footer.year}</span>
@@ -272,6 +295,18 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   .connect .link[data-copied] .copy__done { display: inline; }
   .connect .link::before { content: ''; position: absolute; inset: -12px -6px; } /* зона нажатия ≥ 44px */
 
+
+  /* ---------- мобильная анимация аватара ---------- */
+  .avfx, .avfx-bar { display: none; }
+  :global(html.avfx-on) .avfx { position: fixed; left: 0; top: 0; z-index: 25; pointer-events: none; overflow: visible; }
+  :global(html.avfx-on) .avfx-bar {
+    display: block; position: fixed; left: 0; right: 0; top: 0; z-index: 20; pointer-events: none;
+    height: calc(max(12px, env(safe-area-inset-top)) + 40px + 18px);
+    background: linear-gradient(to bottom, var(--color-bg) 62%, transparent);
+    opacity: 0; transition: opacity 0.25s var(--ease-out);
+  }
+  :global(html.avfx-on.avfx-scrolled) .avfx-bar { opacity: 1; }
+
   /* ---------- адаптив ---------- */
   /* ноутбук 1024–1439: макет 800px по центру, без изменений */
   /* планшет 768–1023 */
@@ -322,10 +357,6 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   :global(.motion) .gallery__lens {
     margin: calc(var(--bleed) * -1) calc(var(--lens-m) * -1); padding: var(--bleed) 0; filter: url(#lens);
   }
-  /* линза (SVG-фильтр) — только на десктопе с мышью: на мобильных GPU и в Safari iOS дорого/нестабильно */
-  @media (max-width: 1023px), (hover: none) {
-    :global(.motion) .gallery__lens { filter: none; }
-  }
   :global(.motion) .gallery__set[data-clone] { display: flex; }
   :global(.motion) .gallery__track {
     transform: translate3d(calc(var(--lens-m) + var(--gutter) - var(--period)), 0, 0);
@@ -338,5 +369,6 @@ const SETS = 4; // 1 реальный + клоны для бесконечной
   import '../scripts/motion';
   import '../scripts/tabs';
   import '../scripts/copy';
+  import '../scripts/avatar-fx';
   import '../scripts/controls';
 </script>
